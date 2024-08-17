@@ -5,6 +5,9 @@ import Navbar from "@/components/Navbar";
 import NavLinks from "@/components/Nav-links";
 import Announcement from "@/components/Announcement";
 import TopUsers from "@/components/TopUsers";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { ourFileRouter } from "./api/uploadthing/core";
+import { extractRouterConfig } from "uploadthing/server";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,17 +31,26 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} bg-zinc-950 text-zinc-50`}>
-        <Navbar/>
+       <NextSSRPlugin
+                 routerConfig={extractRouterConfig(ourFileRouter)}
+
+       />
+       <Navbar/>
         <main className="flex  items-start py-5 gap-2 px-10">
-   <div className="left hidden  sm:flex flex-col gap-2">
+   <div className="left flex flex-col gap-2">
    <NavLinks/>
-   <Announcement/>
+ <div className=" flex-col hidden lg:flex">
+ <Announcement/>
+ </div>
    </div>
         {children}
-        <div className="right hidden  sm:flex flex-col gap-2">
+
+        <div className="right hidden  lg:flex flex-col gap-2">
       <TopUsers/>
    </div> 
         </main>
+        <div className="block h-[100px]"></div>
+
       </body>
     </html>
   );
