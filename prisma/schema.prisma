@@ -1,88 +1,84 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
-// prisma/schema.prisma
+
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
-  // uncomment next line if you use Prisma <5.10
-  // directUrl = env("DATABASE_URL_UNPOOLED")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String  @map("user_id")
-  type               String
-  provider           String
-  providerAccountId  String  @map("provider_account_id")
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String? @db.Text
-  session_state      String?
- 
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
- 
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@map("sessions")
 }
- 
+
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String?    @unique
+  emailVerified DateTime?  @map("email_verified")
   image         String?
   accounts      Account[]
   sessions      Session[]
-  posts         Post[]    @relation("writtenPosts")
+  posts         Post[]     @relation("writtenPosts")
   likedPosts    PostLike[] @relation("UserLikesPosts")
   savedPosts    PostSave[] @relation("UserSavesPosts")
-  comments      Comment[] @relation("UserComments")
-  votes  Vote[] @relation("user-votes")
+  comments      Comment[]  @relation("UserComments")
+  votes         Vote[]     @relation("UserVotes")
+  polls         Poll[]     @relation("UserPolls")
+
   @@map("users")
 }
 
 model Post {
-  id            String   @id @default(cuid())
+  type          String     @default("post")
+  id            String     @id @default(cuid())
   caption       String
-  user          User     @relation("writtenPosts", fields: [userId], references: [id])
+  user          User       @relation("writtenPosts", fields: [userId], references: [id], onDelete: Cascade)
   userId        String
-  like_count    Int      @default(0)
-  save_count    Int      @default(0)
-  share_count   Int      @default(0)
-  comment_count Int      @default(0)
+  like_count    Int        @default(0)
+  save_count    Int        @default(0)
+  share_count   Int        @default(0)
+  comment_count Int        @default(0)
   likedBy       PostLike[] @relation("PostLikedByUsers")
   savedBy       PostSave[] @relation("PostSavedByUsers")
-  comments      Comment[] @relation("PostComments")
- createdAt      DateTime  @default(now())
+  comments      Comment[]  @relation("PostComments")
+  createdAt     DateTime   @default(now())
+  poll          Poll?      @relation("pollPost")
+
   @@map("posts")
 }
 
 model PostLike {
   userId String
   postId String
-  user   User @relation("UserLikesPosts", fields: [userId], references: [id], onDelete: Cascade)
-  post   Post @relation("PostLikedByUsers", fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation("UserLikesPosts", fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation("PostLikedByUsers", fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId])
   @@map("post_likes")
@@ -91,8 +87,8 @@ model PostLike {
 model PostSave {
   userId String
   postId String
-  user   User @relation("UserSavesPosts", fields: [userId], references: [id], onDelete: Cascade)
-  post   Post @relation("PostSavedByUsers", fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation("UserSavesPosts", fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation("PostSavedByUsers", fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId])
   @@map("post_saves")
@@ -110,21 +106,29 @@ model Comment {
   @@map("comments")
 }
 
-model Vote{
-  id String @id @default(cuid()) @unique
-  voter    User   @relation("user-votes", fields: [userId], references: [id])
-  userId   String
-  poll     Poll   @relation("poll-votes", fields: [pollId], references: [id])
-  pollId   String
- option String
+model Vote {
+  id        String   @id @default(cuid())
+  voter     User     @relation("UserVotes", fields: [userId], references: [id])
+  userId    String
+  poll      Poll     @relation("PollVotes", fields: [pollId], references: [id])
+  pollId    String
+  option    String
+  createdAt DateTime @default(now())
+
+  @@map("votes")
 }
+
 model Poll {
-  id String @id @default(cuid()) 
-  options String[]
-  userId  String
-  votes      Vote[]   @relation("poll-votes")
-  vote_count Int  @default(0)
- caption  String @default("untitled poll")
-  createAt DateTime @default(now())
-  @@map("poll")
-  }
+  id         String   @id @default(cuid())
+  options    String[]
+  user       User     @relation("UserPolls", fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  votes      Vote[]   @relation("PollVotes")
+  vote_count Int      @default(0)
+  post       Post     @relation("pollPost", fields: [postId], references: [id], onDelete: Cascade)
+  postId     String   @unique
+  createdAt  DateTime @default(now())
+  score_board String
+  
+  @@map("polls")
+}

@@ -7,7 +7,7 @@ import Notificatons from './Notificatons'
 
 const Navbar = () => {
   return (
-  <nav className='px-10 py-4 w-full flex justify-between items-center border-b border-zinc-700'>
+  <nav className='px-10  bg-zinc-950 z-10 h-[70px] w-full flex justify-between items-center border-b border-zinc-700'>
     <Logo />
     <div className="right  flex items-center gap-2">
     <SearchBar/>

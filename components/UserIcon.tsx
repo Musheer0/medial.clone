@@ -1,6 +1,6 @@
 "use server"
 import { auth } from '@/auth'
-import React, { use } from 'react'
+import React from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,7 +18,7 @@ const UserIcon =async ({showdropdown=false}: {showdropdown?:boolean}) => {
     if(showdropdown) return <DropdownMenu>
     <DropdownMenuTrigger>
     <div className='w-[34px]   overflow-hidden rounded-full bg-zinc-50'>
-    <img src={user.user.image|| ''} alt="user profile" />
+    <img src={user.user.image|| ''} className='w-[34px] h-[34px]' alt="user profile " title={user.user.name as string} />
     </div>
     </DropdownMenuTrigger>
     <DropdownMenuContent>
