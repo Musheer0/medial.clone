@@ -36,6 +36,7 @@ const CreatePostForm = () => {
          const form = e.target as HTMLFormElement;
          const formData = new FormData(form);
          const caption = formData.get('caption') as string;
+         
          const post_data:z.infer<typeof PostZod> ={
             caption
          }
@@ -70,8 +71,8 @@ const CreatePostForm = () => {
       }
   return (
      <div>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-2'>
-        <ResizableTextarea  name='caption' placeholder='What&apos;sin your mind?'/>
+      <form onSubmit={handleSubmit} className='flex flex-col overflow-auto gap-2'>
+        <ResizableTextarea   name='caption' placeholder='What&apos;s in your mind?'/>
       {error &&        <Error msg={error}/>      }
         <div className='flex justify-between w-full'>
         <label htmlFor="media">

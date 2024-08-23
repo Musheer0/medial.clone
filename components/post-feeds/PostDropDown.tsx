@@ -12,7 +12,7 @@ import React, { useState } from 'react'
 import { BsThreeDotsVertical } from "react-icons/bs";
 import DeletePostButton from "../post/DeletePostButton";
 
-const PostDropDown = ({post, deleting}:{post:PostFeedType,deleting:any}) => {
+const PostDropDown = ({post, deleting}:{post:PostFeedType,deleting?:any}) => {
   
   const {user}= useUserStore()
   if(!user) return <></>

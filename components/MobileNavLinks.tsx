@@ -34,13 +34,13 @@ export const mobileLinks:Link[]=[
 
   },
 
-  {
-    path: '/profile',
-    name: 'profile',
-    icon:       <UserIcon />
+  // {
+  //   path: '/profile',
+  //   name: 'profile',
+  //   icon:       <UserIcon />
 
 
-  },
+  // },
 ]
 const MobileNavLinks = () => {
   return (

@@ -4,9 +4,9 @@ import { TransitionPanel } from './core/transtion-panel';
 import { TabTransitonPanelProps } from '@/type';
 
 export function TabsTransitionPanel({pages}:{pages:TabTransitonPanelProps[]}) {
+  const [activeIndex, setActiveIndex] = useState(0);
   if(!pages) return "error no pages found"
   
-    const [activeIndex, setActiveIndex] = useState(0);
 //[trigger, components]
 
   return (

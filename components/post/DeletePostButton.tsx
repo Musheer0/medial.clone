@@ -10,9 +10,8 @@ interface DeletePostButtonProps extends PropsWithChildren{
 }
 const DeletePostButton = ({post,className,children,deleteState}:DeletePostButtonProps) => {
   const mutation = useDeletePostMutation()
-  deleteState(mutation.isPending)
   const  DeletePost = ()=>{
-    mutation.mutate(post,{
+    mutation.mutate(post.id,{
     })
   }
   if(mutation.isPending) return <div className='flex items-center justify-center'>

@@ -1,10 +1,14 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+
 }
 
+// prisma/schema.prisma
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model Account {
@@ -40,6 +44,11 @@ model Session {
 model User {
   id            String     @id @default(cuid())
   name          String?
+  bio             String      @default("Glad to be in medial")
+  location    String?
+  tagline String?         @default("user at medial")
+  createdAt  DateTime @default(now())
+  username   String?  @unique
   email         String?    @unique
   emailVerified DateTime?  @map("email_verified")
   image         String?
@@ -48,10 +57,12 @@ model User {
   posts         Post[]     @relation("writtenPosts")
   likedPosts    PostLike[] @relation("UserLikesPosts")
   savedPosts    PostSave[] @relation("UserSavesPosts")
-  comments      Comment[]  @relation("UserComments")
   votes         Vote[]     @relation("UserVotes")
   polls         Poll[]     @relation("UserPolls")
-
+  follower_count BigInt @default(0)
+  follwer Follow[] @relation("user-follower")
+  follwing Follow[] @relation("user-following")
+  comments Comment[] @relation("comment")
   @@map("users")
 }
 
@@ -61,16 +72,15 @@ model Post {
   caption       String
   user          User       @relation("writtenPosts", fields: [userId], references: [id], onDelete: Cascade)
   userId        String
-  like_count    Int        @default(0)
-  save_count    Int        @default(0)
-  share_count   Int        @default(0)
-  comment_count Int        @default(0)
+  like_count    BigInt       @default(0)
+  save_count    BigInt     @default(0)
+  share_count   BigInt     @default(0)
+  comment_count BigInt     @default(0)
   likedBy       PostLike[] @relation("PostLikedByUsers")
   savedBy       PostSave[] @relation("PostSavedByUsers")
-  comments      Comment[]  @relation("PostComments")
   createdAt     DateTime   @default(now())
   poll          Poll?      @relation("pollPost")
-
+  comments Comment[]  @relation("post-comment")
   @@map("posts")
 }
 
@@ -79,32 +89,24 @@ model PostLike {
   postId String
   user   User   @relation("UserLikesPosts", fields: [userId], references: [id], onDelete: Cascade)
   post   Post   @relation("PostLikedByUsers", fields: [postId], references: [id], onDelete: Cascade)
-
-  @@id([userId, postId])
+  commentid String
+  comment Comment @relation("CommentLikedByUsers", references: [id], fields: [commentid])
+  @@id([userId, postId, commentid])
   @@map("post_likes")
 }
 
 model PostSave {
   userId String
   postId String
+  commentid String
   user   User   @relation("UserSavesPosts", fields: [userId], references: [id], onDelete: Cascade)
   post   Post   @relation("PostSavedByUsers", fields: [postId], references: [id], onDelete: Cascade)
-
-  @@id([userId, postId])
+  comment Comment @relation("CommentSavedByUsers", references: [id], fields: [commentid])
+  @@id([userId, postId, commentid])
   @@map("post_saves")
 }
 
-model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  postId    String
-  userId    String
-  post      Post     @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
-  user      User     @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
 
-  @@map("comments")
-}
 
 model Vote {
   id        String   @id @default(cuid())
@@ -131,4 +133,32 @@ model Poll {
   score_board String
   
   @@map("polls")
+}
+model Comment {
+  id String @id @default(cuid())
+  userId String
+  user User      @relation("comment", references: [id], fields: [userId], onDelete: Cascade)
+  post Post   @relation("post-comment",references: [id], fields: [postId] ,onDelete: Cascade)
+  postId String  
+ comment String
+ createdAt DateTime @default(now())
+ parentId String? 
+   like_count    BigInt       @default(0)
+  save_count    BigInt     @default(0)
+  share_count   BigInt     @default(0)
+  comment_count BigInt     @default(0)
+  likedBy       PostLike[] @relation("CommentLikedByUsers")
+  savedBy       PostSave[] @relation("CommentSavedByUsers")
+ parent Comment? @relation("comment-reply", references: [id], fields: [parentId], onDelete: Cascade)
+ replies Comment[]  @relation("comment-reply")
+  @@map("comment" )
+}
+model Follow {
+  followerId String
+  follower User @relation("user-follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following User @relation("user-following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  @@unique([followerId, followingId])
+  @@map("follows")
 }

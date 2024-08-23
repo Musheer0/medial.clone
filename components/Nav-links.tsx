@@ -38,13 +38,13 @@ export const links:Link[]  = [
     icon: '🚀'
 
   },
-  {
-    path: '/profile',
-    name: 'profile',
-    icon:       <UserIcon/>
+  // {
+  //   path: '/profile',
+  //   name: 'profile',
+  //   icon:       <UserIcon/>
 
 
-  },
+  // },
 ]
 export const mobileLinks:Link[]=[
   {
@@ -68,13 +68,13 @@ export const mobileLinks:Link[]=[
 
   },
 
-  {
-    path: '/profile',
-    name: 'profile',
-    icon:       <UserIcon />
+  // {
+  //   path: '/profile',
+  //   name: 'profile',
+  //   icon:       <UserIcon />
 
 
-  },
+  // },
 ]
 const NavLinks = () => {
   return (

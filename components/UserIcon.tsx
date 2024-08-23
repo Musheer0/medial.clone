@@ -11,7 +11,7 @@ import {
   } from "@/components/ui/dropdown-menu"
 import PopupModel from './PopupModel'
 import Logout from '@/components/Logout'
-const UserIcon =async ({showdropdown=false}: {showdropdown?:boolean}) => {
+const UserIcon =async ({showdropdown}: {showdropdown?:boolean}) => {
     const user = await auth()
     if(!user?.user && showdropdown)  return <PopupModel title='Login' titleClassName='px-6 py-2 border border-zinc-800 rounded-full'></PopupModel>
     if(!user?.user) return <div className='w-[30px] h-[30px] rounded-full text-zinc-950 text-xs flex justify-center items-center bg-zinc-50'>N/A</div>

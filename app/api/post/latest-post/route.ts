@@ -14,7 +14,15 @@ export async function GET (req:NextRequest){
          }); 
          const nextCursor = posts.length>PageSize ? posts[PageSize].id : null;
          const data:PostsPage ={
-            posts: posts.slice(0,PageSize),
+            posts: posts.slice(0,PageSize).map((e)=>{
+           const post = {...e}
+           for(const key in post) {
+            if(key.endsWith('count')){
+                (post as any)[key] = Number( (post as any)[key])
+            }
+           }
+           return post
+            }),
             nextCursor 
          }
          return Response.json(data)

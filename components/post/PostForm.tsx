@@ -8,6 +8,8 @@ import { CgClose } from 'react-icons/cg'
 import LoadingButton from '../LoadingButton'
 import CreatePostForm from './CreatePostForm'
 import CreatePollForm from './CreatePollForm'
+import useUserStore from '@/libs/user/useUserStore'
+import LoginWithGoogle from '../LoginWithGoogle'
 
 
 
@@ -28,6 +30,9 @@ const pages:TabTransitonPanelProps[] = [
   },
 ]
 const PostForm = () => {
+  const {user} = useUserStore()
+  console.log(user)
+  if(!user?.id) return ;
   return (
      <TabsTransitionPanel pages={pages}/>
   )

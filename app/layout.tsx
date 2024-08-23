@@ -12,6 +12,8 @@ import TopLoader from "@/components/TopLoader";
 import ReactQueryProvider from "@/components/context-providers/ReactQueryProvider";
 import MobileNavLinks from "@/components/MobileNavLinks";
 import InitUser from "@/components/InitUser";
+import { Suspense } from "react";
+import { SessionProvider } from "next-auth/react";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -34,12 +36,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} bg-zinc-950 text-zinc-50`}>
+           <SessionProvider>
             <ReactQueryProvider>
             <NextSSRPlugin
                  routerConfig={extractRouterConfig(ourFileRouter)} />
             <InitUser/>
        <Navbar/>
-        <main className="flex  items-start py-5  gap-2 sm:px-10 px-0">
+        <main className="flex  items-start py-5  gap-2 lg:px-10 px-2">
    <div className="left hidden lg:flex flex-col gap-2 sticky top-2">
    <NavLinks/>
  <div className=" flex-col hidden lg:flex">
@@ -49,11 +52,14 @@ export default function RootLayout({
    <MobileNavLinks/>
         {children}
         <div className="right hidden  lg:flex flex-col sticky top-2 gap-2">
-      <TopUsers/>
+  <Suspense  fallback='Loading'>
+  <TopUsers/>
+  </Suspense>
    </div> 
         </main>
         <div className="block h-[100px]"></div>
             </ReactQueryProvider>
+            </SessionProvider>
       </body>
     </html>
   );

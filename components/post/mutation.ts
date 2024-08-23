@@ -79,7 +79,7 @@ export function useDeletePostMutation(){
                         ...oldData,
                         pages: oldData.pages.map((page) => ({
                             ...page,
-                            posts: page.posts.filter(post => post.id !== oldPost.success?.id)
+                            posts: oldPost?.success ?  page.posts.filter(post => post.id !== oldPost.success as string): page.posts
                         })),
                     };
                 }

@@ -1,10 +1,9 @@
 "use server"
-
 import { auth } from "@/auth"
 import prisma from "@/prisma";
 import { z } from "zod";
 import { PollSchema, PostZod } from "../validation";
-import { PostFeedType } from "@/type";
+import { Post } from "@prisma/client";
 
 type CreatePostProps = z.infer<typeof PostZod>;
 
@@ -54,9 +53,11 @@ export const CreatePost = async (data: CreatePostProps) => {
 };
 export const CreatePoll = async(data:z.infer<typeof PollSchema>)=>{
   const session = await auth();
+  //@ts-ignore
 if(!session?.user?.id) throw new Error("Access denied");
 try{
   const {title, options}= PollSchema.parse(data)
+  //@ts-ignore
   if(!title || !options) throw new Error("Invalid Data");
 const score_board = options.map((e)=>{
 return {
@@ -105,17 +106,89 @@ catch{
 }
 
 }
-export const DeletePost = async(Post:PostFeedType)=>{
+export const DeletePost = async(postId:string)=>{
+  if(!postId) return;
   const session = await auth();
   if(!session?.user) throw new Error("Access denied")
-  if(Post.user.id!==session.user.id) throw new Error("Access denied")
+  const Post = await prisma.post.findFirst({where: {id:postId}}) as Post
+  if(Post.userId!==session.user.id) throw new Error("Access denied")
 try{
-  const deleted_post = await prisma.post.delete({where: {id:Post.id,userId: session.user.id }});
+   await prisma.post.delete({where: {id:Post.id,userId: session.user.id }});
   
-  return {"success": deleted_post||Post};
+  return {"success": postId};
 }
 catch{
   return {error:"error deleting post"}
 }
 
+}
+export const GetPost = async (postId: string) => {
+  if (!postId) {
+    return { error: 'Post ID is required' };
+  }
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            image: true,
+            // Add any other fields or relations as needed
+          },
+        },
+        poll: true,
+      },
+    });
+
+    if (post) {
+      return post;
+    } else {
+      return { error: 'No post found' };
+    }
+  } catch (error) {
+    console.error('Error fetching post:', error);
+    return { error: 'Internal server error' };
+  }
+};
+export const CreateComment = async(postid:string,comment:string, parent?:string)=>{
+  if(!comment) return;
+  const session = await auth()
+  if(!session?.user)   //@ts-ignore
+  throw new Error("error adding comment ")
+ try{
+  const Newcomment = await prisma.comment.create({
+    data:{
+      comment,
+      parentId:parent || null,
+      postId: postid,
+      userId:session.user.id as string,
+    }
+  })
+  return Newcomment
+ }
+ catch(e:any){
+  //@ts-ignore
+ throw new Error("error adding comment ")
+ }
+}
+export const DeleteComment =async (commentid:string)=>{
+  if(!commentid) return;
+  const session = await auth()
+  if(!session?.user)   //@ts-ignore
+  throw new Error("error adding comment ")
+  try {
+     await prisma.comment.delete({
+      where:{
+        id: commentid,
+        userId: session.user.id
+      }
+     })
+     return{id: commentid}
+  } catch (error) {
+      //@ts-ignore
+ throw new Error("error adding comment ")
+  }
 }
