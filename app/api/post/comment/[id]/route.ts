@@ -19,7 +19,8 @@ export async function GET(req:NextRequest, {params:{id}}:{params:{id:string}}){
             user: {select:{
                 username:true,
                 image:true,
-                id:true
+                id:true,
+                name: true
             }},
             likedBy:session?.user ? 
             {
@@ -38,14 +39,24 @@ export async function GET(req:NextRequest, {params:{id}}:{params:{id:string}}){
             }
             :false,
         },
+        orderBy:{createdAt:'desc'},
         cursor: cursor? {id:cursor} : undefined
     });
     const nextCursor =  comments.length>pagesize ? comments[pagesize].id: null;
     return Response.json({
         nextCursor,
-       comments: comments.slice(0,pagesize)
+       comments: comments.slice(0,pagesize).map((e)=>{
+        const comment = {...e}
+        for(const key in comment) {
+         if(key.endsWith('count')){
+             (comment as any)[key] = Number( (comment as any)[key])
+         }
+        }
+        return comment
+         }),
     })
   } catch (error) {
+    console.log(error)
      return Response.json({error: 'Internal Server Error'}, {status:500})
   }
 }

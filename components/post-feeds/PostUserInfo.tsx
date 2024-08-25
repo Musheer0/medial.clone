@@ -27,7 +27,7 @@ const UserInfo = ({ user, createdAt, post, setIsDeleting }:UserInfoProps) => {
           alt="User avatar"
         />
         <div className="text flex flex-col gap-2">
-          <p className="font-semibold leading-none text-md">{user.name}</p>
+          <p className="font-semibold leading-none text-md">{user.name||'name'}</p>
           <p className="leading-none text-xs text-zinc-500">
             {createdAt ? formatTimeDifference(createdAt) : 'Just now'}
           </p>

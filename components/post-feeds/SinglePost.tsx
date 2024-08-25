@@ -7,6 +7,7 @@ import Post from './Post'
 import BackButton from './BackButton'
 import { ArrowBigLeft } from 'lucide-react'
 import CommentForm from '../post/CommentForm'
+import Comments from '../post/Comments'
 interface SinglePostProps {
     post : SinglePostFeedType | {error:string}|any,
     session :User|null|undefined
@@ -29,6 +30,9 @@ const SinglePost = ({post,session}:SinglePostProps) => {
   <Post  isSinglePost post={post}/>
   <hr className='border-zinc-800'/>
   <CommentForm post={post} />
+  <div className="comments py-2">
+    <Comments id={post.id}/>
+  </div>
   </div>
     </div>
   )

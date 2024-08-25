@@ -6,6 +6,7 @@ import { CiBoxes } from "react-icons/ci";
 import { IoNotifications } from "react-icons/io5";
 import Link from 'next/link';
 import UserIcon from './UserIcon';
+import { usePathname } from 'next/navigation';
 interface Link {
  path: string,
  name:string,
@@ -87,9 +88,10 @@ const NavLinks = () => {
 export default NavLinks
 
 function DesktopNav(){
+  const pathname = usePathname()
   return <div className='hidden flex-col lg:flex gap-4 bg-zinc-900 p-4 rounded-2xl'>
-    {links.map((e)=>{
-      if(window.location.pathname===e.path)       return <Link key={e.path} className='flex whitespace-nowrap items-center gap-2 bg-purple-600/15 text-purple-400 px-4 py-3 rounded-full' href={e.path}>{e.icon} {e.name}</Link>
+    {links.map((e, i)=>{
+      if(pathname===e.path)       return <Link  key={e.path} className='flex whitespace-nowrap items-center gap-2 bg-purple-600/15 text-purple-400 px-4 py-3 rounded-full' href={e.path}>{e.icon} {e.name}</Link>
 
       return <Link key={e.path} className='flex whitespace-nowrap items-center gap-2 hover:bg-zinc-800 hover:text-purple-400 px-4 py-3 rounded-full' href={e.path}>{e.icon} {e.name}</Link>
     })}

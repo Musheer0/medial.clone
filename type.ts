@@ -1,4 +1,5 @@
 import { Prisma, Post, Follow } from "@prisma/client"
+import { string } from "zod"
 export const pagesize = 10
 export interface TabTransitonPanelProps{
     Trigger :React.Component|any,
@@ -12,27 +13,105 @@ export const PostDataInclue = {
         id: true
     }
   },
-  poll:true
-} satisfies Prisma.PostInclude
-
-export const SinglePostDataInclude = {
-  user: {
-    select:{
-      name: true,
-      image:true,
-      id:true
-      //todo select followerinfo 
+  poll:true,
+  comments:{
+    take:2,
+    include:{
+      user:{
+        select:{
+          image:true
+        }
+      }
     }
-  },
-  poll:true
+  }
 } satisfies Prisma.PostInclude
-
+export const UserPostDataInclue = {
+  poll:true,
+  comments:{
+    take:2,
+    include:{
+      user:{
+        select:{
+          image:true
+        }
+      }
+    }
+  }
+} satisfies Prisma.PostInclude
 export type SinglePostFeedType = Prisma.PostGetPayload<{
-  include : typeof SinglePostDataInclude
-}>
+  include: {
+    user: {
+      select: {
+        name: true;
+        image: true;
+      id:true
+      };
+    };
+    poll: true;
+    likedBy: {
+      where?: {
+        userId: string;
+        postId: string;
+      };
+      
+    };
+    savedBy: {
+      where?: {
+        userId: string;
+        postId: string;
+      };
+      
+    };
+    comments:{
+      take:2,
+      include:{
+        user:{
+          select:{
+            image:true
+          }
+        }
+      }
+    }
+  };
+}>;
+
+
 export type PostFeedType = Prisma.PostGetPayload<{
-    include : typeof PostDataInclue
-}>
+  include: {
+    user: {
+      select: {
+        name: true;
+        image: true;
+        id:true
+      };
+    };
+    poll: true;
+    likedBy: {
+      where?: {
+        userId: string;
+        postId: string;
+      };
+    };
+    savedBy: {
+      where?: {
+        userId: string;
+        postId: string;
+      };
+      
+    };
+    comments:{
+      take:2,
+      include:{
+        user:{
+          select:{
+            image:true
+          }
+        }
+      }
+    }
+  };
+}>;
+
 
 export interface PostsPage {
   nextCursor : any,
@@ -60,4 +139,36 @@ export type UserWithFollower = Prisma.UserGetPayload<{
 
 export type Comment ={
   comment:string,
+}
+export type CommentWithLikesAndSaves = Prisma.CommentGetPayload<{
+  include: {
+    user: {
+      select: {
+        name: true;
+        image: true;
+        id: true;
+      };
+    };
+    likedBy: {
+      where: {
+        userId: string;
+        postId: string;
+      };
+    };
+    savedBy: {
+      where: {
+        userId: string;
+        postId: string;
+      };
+    };
+  };
+}>;
+export interface CommentPage {
+  nextCursor : any,
+  comments: CommentWithLikesAndSaves[],
+}
+export interface CreateCommentArgs {
+  postId: string;
+  comment: string;
+  parent?: string;
 }

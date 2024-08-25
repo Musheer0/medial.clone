@@ -1,6 +1,6 @@
 import { InfiniteData, QueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreatePoll, CreatePost, DeletePost } from '@/libs/post/actions';
-import { PostsPage } from "@/type";
+import { CreateComment, CreatePoll, CreatePost, DeletePost } from '@/libs/post/actions';
+import { CommentPage, CreateCommentArgs, PostsPage } from "@/type";
 
 export function useSubmitPostMutation(){
     const queryClient = useQueryClient();
@@ -87,4 +87,60 @@ export function useDeletePostMutation(){
         },
     });
 }
+export function useCommentSubmitMutation(){
+    const queryClient = useQueryClient();
+       return useMutation({
+    mutationFn: (variables:CreateCommentArgs) => CreateComment(variables.postId, variables.comment,variables.parent),
+    onSuccess:async(newComment)=>{
+        const keys :QueryFilters = {queryKey:['comment', `comment-${newComment?.postId}`]}
+        queryClient.cancelQueries(keys);
+        queryClient.setQueriesData<InfiniteData<CommentPage>>(keys,
+            //@ts-ignore
+            (oldData)=>{
+                if(!oldData) return;
+                return{
+                    ...oldData,
+                    pages: oldData.pages.map((page,i)=>{
+                      if(i===0)   return{
+                        ...page,
+                        comments: [newComment,...page.comments]
+                }
+                        return page
+                    })
+                }
+            }
+        )
+
+    }
+   })
+}
+export function useCommentDeleteMutation(){
+    return useMutation({
+        mutationFn: (variables:CreateCommentArgs) => CreateComment(variables.postId, variables.comment,variables.parent),
+        onSuccess:async(newComment)=>{
+            const queryClient = useQueryClient();
+            const keys :QueryFilters = {queryKey:['comment', `comment-${newComment?.postId}`]}
+            queryClient.cancelQueries(keys);
+            queryClient.setQueriesData<InfiniteData<CommentPage>>(keys,
+                //@ts-ignore
+                (oldData)=>{
+                    if(!oldData) return;
+                    return{
+                        ...oldData,
+                        pages: oldData.pages.map((page,i)=>{
+                          if(i===0)   return{
+                            ...page,
+                            comments: [newComment,...page.comments]
+                    }
+                            return page
+                        })
+                    }
+                }
+            )
+    
+        }
+       })
+}
+
+
 

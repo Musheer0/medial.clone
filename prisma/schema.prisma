@@ -85,24 +85,26 @@ model Post {
 }
 
 model PostLike {
+    id            String     @id @default(cuid())
+
   userId String
-  postId String
+  postId String?
   user   User   @relation("UserLikesPosts", fields: [userId], references: [id], onDelete: Cascade)
-  post   Post   @relation("PostLikedByUsers", fields: [postId], references: [id], onDelete: Cascade)
-  commentid String
-  comment Comment @relation("CommentLikedByUsers", references: [id], fields: [commentid])
-  @@id([userId, postId, commentid])
+  post   Post?   @relation("PostLikedByUsers", fields: [postId], references: [id], onDelete: Cascade)
+  commentid String?
+  comment Comment? @relation("CommentLikedByUsers", references: [id], fields: [commentid])
+  createdAt DateTime @default(now())
   @@map("post_likes")
 }
 
 model PostSave {
+    id            String     @id @default(cuid())
   userId String
-  postId String
-  commentid String
+  postId String?
+  commentid String?
   user   User   @relation("UserSavesPosts", fields: [userId], references: [id], onDelete: Cascade)
-  post   Post   @relation("PostSavedByUsers", fields: [postId], references: [id], onDelete: Cascade)
-  comment Comment @relation("CommentSavedByUsers", references: [id], fields: [commentid])
-  @@id([userId, postId, commentid])
+  post   Post?   @relation("PostSavedByUsers", fields: [postId], references: [id], onDelete: Cascade)
+  comment Comment? @relation("CommentSavedByUsers", references: [id], fields: [commentid])
   @@map("post_saves")
 }
 

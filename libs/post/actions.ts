@@ -123,6 +123,7 @@ catch{
 
 }
 export const GetPost = async (postId: string) => {
+  const session = await auth();
   if (!postId) {
     return { error: 'Post ID is required' };
   }
@@ -136,10 +137,22 @@ export const GetPost = async (postId: string) => {
           select: {
             name: true,
             image: true,
-            // Add any other fields or relations as needed
+            id:true
           },
         },
         poll: true,
+        likedBy: session?.user?.id ? {
+          where:{
+            userId: session.user.id,
+            postId:postId
+          }
+        }:false,
+        savedBy:session?.user?.id ? {
+          where:{
+            userId: session.user.id,
+            postId:postId
+          }
+        }:false
       },
     });
 
@@ -165,27 +178,73 @@ export const CreateComment = async(postid:string,comment:string, parent?:string)
       parentId:parent || null,
       postId: postid,
       userId:session.user.id as string,
+    },
+    include:{
+      user: true,
+      likedBy: {
+        where:{
+          userId: session.user.id
+        },
+       take:1
+      },
+      savedBy:{
+        where:{
+          userId: session.user.id
+        },
+       take:1
+      },
     }
   })
+  if(Newcomment)
+  if(parent)
+    await prisma.comment.update({
+  where:{id:parent},
+data:{
+  comment_count: {increment:1}
+}
+});
+ await prisma.post.update({
+  where:{id:postid},
+data:{
+  comment_count: {increment:1}
+}
+});
   return Newcomment
  }
  catch(e:any){
+  console.log(e)
   //@ts-ignore
+
  throw new Error("error adding comment ")
  }
 }
-export const DeleteComment =async (commentid:string)=>{
+export const DeleteComment =async (commentid:string, postid?:string, parentid?:string)=>{
   if(!commentid) return;
   const session = await auth()
   if(!session?.user)   //@ts-ignore
   throw new Error("error adding comment ")
   try {
-     await prisma.comment.delete({
+   const deletedcomment =   await prisma.comment.delete({
       where:{
         id: commentid,
         userId: session.user.id
       }
-     })
+     });
+     if(deletedcomment)
+      if(parentid)
+        await prisma.comment.update({
+      where:{id:parentid},
+    data:{
+      comment_count: {decrement:1}
+    }
+    });
+     else
+     await prisma.post.update({
+      where:{id:postid},
+    data:{
+      comment_count: {decrement:1}
+    }
+    });
      return{id: commentid}
   } catch (error) {
       //@ts-ignore
